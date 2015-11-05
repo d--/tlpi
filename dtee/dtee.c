@@ -6,19 +6,23 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#define DEBUG(...) fprintf(stderr, "DEBUG: "); fprintf(stderr, __VA_ARGS__);
+
 int main(int argc, char *argv[])
 {
     // get options
     int option;
-    while ((option = getopt(argc, argv, "b:")) != -1) {
+    while ((option = getopt(argc, argv, "a")) != -1) {
         switch (option) {
-        case 'b':
-            printf("butt\n");
-            printf("%s\n", optarg);
+        case 'a':
+            DEBUG("append mode not currently implemented\n");
             break;
         default:
             exit(EXIT_FAILURE);
         }
+    }
+    if (optind < argc) {
+        DEBUG("filename argument not currently implemented\n");
     }
 
     // create a buffer that is the appropriate size 

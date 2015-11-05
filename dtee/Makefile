@@ -3,6 +3,9 @@ CFLAGS = -Wall
 MAIN = dtee
 
 $(MAIN): $(MAIN).c
-	$(CC) $^ -o $@ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS)
+
+.PHONY: clean
+
 clean:
 	rm $(MAIN) 
