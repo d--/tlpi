@@ -7,20 +7,15 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#define ASSERT(cond, err) { \
-    if(cond) { \
-        fprintf(stderr, err); \
-        exit(EXIT_FAILURE); \
-    } \
-}
+size_t create_read_buffer(char **buffer);
+int open_file(char *fname, int append);
 
 int main(int argc, char *argv[])
 {
-    // get options
-    int option;
     int append = 0;
-    while ((option = getopt(argc, argv, "a")) != -1) {
-        switch (option) {
+    int opt;
+    while ((opt = getopt(argc, argv, "a")) != -1) {
+        switch (opt) {
         case 'a':
             append = 1;
             break;
@@ -29,50 +24,29 @@ int main(int argc, char *argv[])
         }
     }
 
-    // get other args
-    int have_more_args = (optind < argc);
-    int fout = 0;
-    char *fname = NULL;
-    if (have_more_args) {
-        fout = 1;
+    int output_to_file = (optind < argc);
+    char *fname;
+    if (output_to_file) {
         fname = argv[optind];
-    }
-    ASSERT(fname == NULL && append, "-a: Specify a filename.\n");
-
-    // create a buffer that is the appropriate size 
-    struct stat bufstat;
-    if (fstat(STDIN_FILENO, &bufstat) == -1) {
-        perror("fstat");
+    } else if (append) {
+        fprintf(stderr, "-a: Specify a filename.\n");
         exit(EXIT_FAILURE);
     }
-    blksize_t bsize = bufstat.st_blksize;
+    
     static char *buffer;
-    ASSERT((buffer = malloc(bsize)) == NULL, "error allocating memory\n");
-    memset(buffer, 0, bsize);
+    size_t bsize = create_read_buffer(&buffer);
 
-    // open file
     int fd;
-    if (fout) {
-        int flags = O_WRONLY | O_CREAT | O_TRUNC;
-        if (append) {
-            flags |= O_APPEND;
-            flags ^= O_TRUNC;
-        }
-        fd = open(fname, flags, 0644); 
-        if (fd == -1) {
-            perror("open");
-            exit(EXIT_FAILURE);
-        }
-    }
+    if (output_to_file)
+        fd = open_file(fname, append);
 
-    // write to stdout and file
     int readlen;
     while ((readlen = read(STDIN_FILENO, buffer, bsize)) > 0) {
         if (write(STDOUT_FILENO, buffer, readlen) == -1) {
             perror("write");
             exit(EXIT_FAILURE);
         }
-        if (fout && write(fd, buffer, readlen) == -1) {
+        if (output_to_file && write(fd, buffer, readlen) == -1) {
             perror("file write");
             exit(EXIT_FAILURE);
         }
@@ -85,4 +59,36 @@ int main(int argc, char *argv[])
 
     free(buffer);
     exit(EXIT_SUCCESS);
+}
+
+size_t create_read_buffer(char **buffer)
+{
+    struct stat stdin_stat;
+    if (fstat(STDIN_FILENO, &stdin_stat) == -1) {
+        perror("fstat");
+        exit(EXIT_FAILURE);
+    }
+    blksize_t bsize = stdin_stat.st_blksize;
+    if ((*buffer = malloc(bsize)) == NULL) {
+        fprintf(stderr, "error allocating memory\n");
+        exit(EXIT_FAILURE);
+    }
+    memset(*buffer, 0, bsize);
+    return bsize;
+}
+
+int open_file(char *fname, int append)
+{
+    int fd;
+    int flags = O_WRONLY | O_CREAT | O_TRUNC;
+    if (append) {
+        flags |= O_APPEND;
+        flags ^= O_TRUNC;
+    }
+    fd = open(fname, flags, 0644); 
+    if (fd == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+    return fd;
 }
