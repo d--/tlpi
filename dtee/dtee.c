@@ -7,10 +7,6 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#define DEBUG(...) { \
-    fprintf(stderr,"DEBUG: "); \
-    fprintf(stderr,__VA_ARGS__); \
-}
 #define ASSERT(cond, err) { \
     if(cond) { \
         fprintf(stderr, err); \
