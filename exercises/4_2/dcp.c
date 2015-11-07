@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        fprintf(stderr, "Please specify a target file.\n");
+        fprintf(stderr, "Please specify a source file.\n");
         exit(EXIT_FAILURE);
     }
     int src_fd, src_flags;
