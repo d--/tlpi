@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <getopt.h>
 
@@ -50,7 +49,6 @@ int main(int argc, char *argv[])
             perror("file write");
             exit(EXIT_FAILURE);
         }
-        memset(buffer, 0, bsize);
     }
     if (readlen == -1) {
         perror("read");
@@ -69,11 +67,10 @@ size_t create_read_buffer(char **buffer)
         exit(EXIT_FAILURE);
     }
     blksize_t bsize = stdin_stat.st_blksize;
-    if ((*buffer = malloc(bsize)) == NULL) {
+    if ((*buffer = calloc(bsize, 1)) == NULL) {
         fprintf(stderr, "error allocating memory\n");
         exit(EXIT_FAILURE);
     }
-    memset(*buffer, 0, bsize);
     return bsize;
 }
 
