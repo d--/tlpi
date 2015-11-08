@@ -5,7 +5,13 @@ MAIN = dcp
 $(MAIN): $(MAIN).c
 	$(CC) -o $@ $^ $(CFLAGS)
 
-.PHONY: clean
+holes: holes.c
+	$(CC) -o $@ $^ $(CFLAGS) && ./$@
+
+.PHONY: clean rmholes
 
 clean:
-	rm $(MAIN) 
+	rm $(MAIN)
+
+rmholes:
+	rm holes holy_file

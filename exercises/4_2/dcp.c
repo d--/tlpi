@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
     static char *buffer;
     size_t bsize = create_read_buffer(&buffer);
 
-    // simple cp
     int read_len;
     while ((read_len = read(src_fd, buffer, bsize)) > 0) {
         if (write(dest_fd, buffer, read_len) == -1) {
